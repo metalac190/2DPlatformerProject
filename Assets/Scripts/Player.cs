@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(CapsuleCollider2D))]
+[RequireComponent(typeof(BoxCollider2D))]
 public class Player : MonoBehaviour {
 
     // config
     [SerializeField] float runSpeed = 5f;
     [SerializeField] float jumpSpeed = 20f;
     [SerializeField] float climbSpeed = 5f;
+    [SerializeField] Vector2 deathKick = new Vector2(10f, 10f);
 
     // state
     bool isAlive = true;
@@ -32,10 +37,23 @@ public class Player : MonoBehaviour {
 
     private void Update()
     {
+        if(!isAlive) { return; }
+
         Run();
         ClimbLadder();
         Jump();
         FlipSprite();
+        Die();
+    }
+
+    private void Die()
+    {
+        if (bodyCollider2D.IsTouchingLayers(LayerMask.GetMask("Enemy", "Hazard")))
+        {
+            isAlive = false;
+            animator.SetTrigger("Dying");
+            GetComponent<Rigidbody2D>().velocity = deathKick;
+        }
     }
 
     private void Run()
