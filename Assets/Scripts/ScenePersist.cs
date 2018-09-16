@@ -33,11 +33,12 @@ public class ScenePersist : MonoBehaviour {
         #region Singleton Pattern - Create/Destroy
         if(Instance != this)
         {
-            Destroy(this);
+            Destroy(gameObject);
         }
         else
         {
             DontDestroyOnLoad(gameObject);
+            Initialize();
             SceneManager.sceneLoaded += HandleNewSceneLoaded;
         }
         #endregion
@@ -45,17 +46,25 @@ public class ScenePersist : MonoBehaviour {
 
     private void HandleNewSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-
+        DestroyIfDifferentLevel();
     }
 
-    private void Start()
+    private void DestroyIfDifferentLevel()
+    {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        if (currentSceneIndex != startingSceneIndex)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void Initialize()
+    {
+        StoreLevelIndex();
+    }
+
+    private void StoreLevelIndex()
     {
         startingSceneIndex = SceneManager.GetActiveScene().buildIndex;
     }
-
-    // Update is called once per frame
-    void Update ()
-    {
-		
-	}
 }
