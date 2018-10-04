@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
+using System;
 
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(CapsuleCollider2D))]
 [RequireComponent(typeof(BoxCollider2D))]
 public class Player : MonoBehaviour {
@@ -15,12 +15,19 @@ public class Player : MonoBehaviour {
     [SerializeField] float climbSpeed = 5f;
     [SerializeField] Vector2 deathKick = new Vector2(10f, 10f);
 
+
+    public event Action OnLand = delegate { };
+    public event Action OnJump = delegate { };
+    public event Action OnDeath = delegate { };
+    public event Action OnRunning = delegate { };
+
     // state
     bool isAlive = true;
+    bool isGrounded = true;
+    public bool HasHorizontalSpeed { get; private set; }
 
     // cached component references
     Rigidbody2D rigidbody2D;
-    Animator animator;
     CapsuleCollider2D bodyCollider2D;
     BoxCollider2D feetCollider2D;
     float gravityScaleAtStart;
@@ -29,7 +36,6 @@ public class Player : MonoBehaviour {
     private void Start()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
         bodyCollider2D = GetComponent<CapsuleCollider2D>();
         feetCollider2D = GetComponent<BoxCollider2D>();
         gravityScaleAtStart = rigidbody2D.gravityScale;
@@ -38,12 +44,24 @@ public class Player : MonoBehaviour {
     private void Update()
     {
         if(!isAlive) { return; }
-
+        CheckGrounded();
+        //CheckHorizontalSpeed();
         Run();
-        ClimbLadder();
-        Jump();
-        FlipSprite();
+        CheckJump();
         Die();
+    }
+
+    void CheckGrounded()
+    {
+        // using special foot collider to test ground
+        if (feetCollider2D.IsTouchingLayers(LayerMask.GetMask("Ground")))
+        {
+            isGrounded = true;
+        }
+        else
+        {
+            isGrounded = false;
+        }
     }
 
     private void Die()
@@ -51,8 +69,8 @@ public class Player : MonoBehaviour {
         if (bodyCollider2D.IsTouchingLayers(LayerMask.GetMask("Enemy", "Hazard")))
         {
             isAlive = false;
-            animator.SetTrigger("Dying");
             rigidbody2D.velocity = deathKick;
+            OnDeath.Invoke();
             GameSession.Instance.ProcessPlayerDeath();
         }
     }
@@ -63,51 +81,26 @@ public class Player : MonoBehaviour {
         // only affect horizontal movement, vertical is controlled by gravity
         Vector2 playerVelocity = new Vector2(controlThrow * runSpeed, rigidbody2D.velocity.y);
         rigidbody2D.velocity = playerVelocity;
-
-        bool playerHasHorizontalSpeed = Mathf.Abs(rigidbody2D.velocity.x) > Mathf.Epsilon;
-        animator.SetBool("Running", playerHasHorizontalSpeed);
     }
 
-    private void ClimbLadder()
+    private void CheckJump()
     {
-        // we're not touching a climbing layer, don't even calculate ladder climb
-        if (!feetCollider2D.IsTouchingLayers(LayerMask.GetMask("Climbing")))
+        // we're not touching the ground layer, don't bother with jump
+        if (!isGrounded)
         {
-            animator.SetBool("Climbing", false);
-            rigidbody2D.gravityScale = gravityScaleAtStart;
             return;
         }
-
-        float controlThrow = CrossPlatformInputManager.GetAxis("Vertical");
-        Vector2 climbVelocity = new Vector2(rigidbody2D.velocity.x, controlThrow * climbSpeed);
-        rigidbody2D.velocity = climbVelocity;
-        rigidbody2D.gravityScale = 0f;
-
-        bool playerHasVerticalSpeed = Mathf.Abs(rigidbody2D.velocity.y) > Mathf.Epsilon;
-        animator.SetBool("Climbing", playerHasVerticalSpeed);
-    }
-
-    private void Jump()
-    {
-        if (!feetCollider2D.IsTouchingLayers(LayerMask.GetMask("Ground")))
-            return;
 
         if (CrossPlatformInputManager.GetButtonDown("Jump"))
         {
             Vector2 jumpVelocityToAdd = new Vector2(0f, jumpSpeed);
             rigidbody2D.velocity += jumpVelocityToAdd;
+            OnJump.Invoke();
         }
     }
 
-    private void FlipSprite()
+    void Land()
     {
-        // if velocity is greater than 0, return true
-        bool playerHasHorizontalSpeed = Mathf.Abs(rigidbody2D.velocity.x) > Mathf.Epsilon;
-        if(playerHasHorizontalSpeed)
-        {
-            // reverse current scaling of x axis
-            transform.localScale = new Vector2(Mathf.Sign(rigidbody2D.velocity.x), 1f);
-        }
+        OnLand.Invoke();
     }
-
 }
