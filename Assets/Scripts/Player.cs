@@ -6,7 +6,6 @@ using System;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CapsuleCollider2D))]
-[RequireComponent(typeof(BoxCollider2D))]
 public class Player : MonoBehaviour {
 
     // config
@@ -37,20 +36,18 @@ public class Player : MonoBehaviour {
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
         bodyCollider2D = GetComponent<CapsuleCollider2D>();
-        feetCollider2D = GetComponent<BoxCollider2D>();
         gravityScaleAtStart = rigidbody2D.gravityScale;
     }
 
     private void Update()
     {
         if(!isAlive) { return; }
-        CheckGrounded();
-        //CheckHorizontalSpeed();
-        Run();
-        CheckJump();
+        //CheckGrounded();
+        //Run();
+        //CheckJump();
         Die();
     }
-
+    /*
     void CheckGrounded()
     {
         // using special foot collider to test ground
@@ -63,6 +60,7 @@ public class Player : MonoBehaviour {
             isGrounded = false;
         }
     }
+    */
 
     private void Die()
     {
@@ -82,7 +80,7 @@ public class Player : MonoBehaviour {
         Vector2 playerVelocity = new Vector2(controlThrow * runSpeed, rigidbody2D.velocity.y);
         rigidbody2D.velocity = playerVelocity;
     }
-
+    /*
     private void CheckJump()
     {
         // we're not touching the ground layer, don't bother with jump
@@ -98,6 +96,7 @@ public class Player : MonoBehaviour {
             OnJump.Invoke();
         }
     }
+    */
 
     void Land()
     {

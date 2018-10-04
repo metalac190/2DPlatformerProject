@@ -4,7 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 public class PlayerAnimations : MonoBehaviour {
-
+    /*
     [SerializeField] Player player;
     [SerializeField] Rigidbody2D playerRigidbody;
 
@@ -74,4 +74,5 @@ public class PlayerAnimations : MonoBehaviour {
         // reverse current scaling of x axis
         transform.localScale = new Vector2(Mathf.Sign(playerRigidbody.velocity.x), 1f);
     }
+    */
 }
