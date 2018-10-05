@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Ability : MonoBehaviour {
+public abstract class Ability : ScriptableObject {
 
-    public abstract void UseAbility();
+    [SerializeField] string abilityName = "New Ability";
+    [SerializeField] AudioClip sound;
+    [SerializeField] float cooldown;
+
+    public abstract void Initialize(GameObject obj);
+    public abstract void Use();
 }

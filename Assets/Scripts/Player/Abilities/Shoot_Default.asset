@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b05e9a9965257964aa438f67d15a2075, type: 3}
+  m_Name: Shoot_Default
+  m_EditorClassIdentifier: 
+  abilityName: New Ability
+  sound: {fileID: 0}
+  cooldown: 0
+  firePoint: {fileID: 4902902056149480, guid: bc9d2b0153f12c84c8ad615d64f19144, type: 2}
+  bulletPrefab: {fileID: 1795251597685820, guid: e653636200dba4643a4bbcdf024b56f3,
+    type: 2}
