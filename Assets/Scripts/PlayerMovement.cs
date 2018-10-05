@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController2D))]
+[RequireComponent(typeof(Animator))]
 public class PlayerMovement : MonoBehaviour {
 
     CharacterController2D controller;
+    Animator animator;
 
     public float runSpeed = 40f;
 
@@ -16,14 +18,33 @@ public class PlayerMovement : MonoBehaviour {
     private void Awake()
     {
         controller = GetComponent<CharacterController2D>();
+        animator = GetComponent<Animator>();
+
+
+    }
+
+    private void OnEnable()
+    {
+        controller.OnLandEvent.AddListener(HandleLand);
+        controller.OnCrouchEvent.AddListener(HandleCrouch);
+    }
+
+    private void OnDisable()
+    {
+        controller.OnLandEvent.RemoveListener(HandleLand);
+        controller.OnCrouchEvent.RemoveListener(HandleCrouch);
     }
 
     void Update () {
 
         horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
+
+        animator.SetFloat("Speed", Mathf.Abs(horizontalMove));
+
         if (Input.GetButtonDown("Jump"))
         {
             isJumping = true;
+            animator.SetBool("IsJumping", true);
         }
         if (Input.GetButtonDown("Crouch"))
         {
@@ -33,6 +54,16 @@ public class PlayerMovement : MonoBehaviour {
         {
             isCrouching = false;
         }
+    }
+
+    void HandleLand()
+    {
+        animator.SetBool("IsJumping", false);
+    }
+
+    public void HandleCrouch(bool isCrouching)
+    {
+        animator.SetBool("IsCrouching", isCrouching);
     }
 
     private void FixedUpdate()
