@@ -24,12 +24,13 @@ public class CharacterController2D : MonoBehaviour
     [Space]
 
     public UnityEvent OnJump = new UnityEvent();
-	public UnityEvent OnLandEvent = new UnityEvent();
+	public UnityEvent OnLand = new UnityEvent();
+    public UnityEvent OnFalling = new UnityEvent();
 
 	[System.Serializable]
 	public class BoolEvent : UnityEvent<bool> { }
 
-	public BoolEvent OnCrouchEvent = new BoolEvent();
+	public BoolEvent OnCrouch = new BoolEvent();
 	private bool m_wasCrouching = false;
 
 	private void Awake()
@@ -39,11 +40,14 @@ public class CharacterController2D : MonoBehaviour
 
 	private void FixedUpdate()
     {
-        // store grounded state from previous cycle. Use this to determine if we've landed
+        // Store previous ground state and reset, so that we can test if landed
         bool wasGrounded = m_Grounded;
-        // reset current grounded state this frame, so that we can retest
         m_Grounded = false;
-        CheckIfFalling();
+        // Store previous fall state and reset, so that we can test if falling
+        bool wasFalling = m_Falling;
+        m_Falling = false;
+
+        CheckIfFalling(wasFalling);
         // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
         // This can be done using layers instead but Sample Assets will not overwrite your project settings.
         DetectGrounded(wasGrounded);
@@ -67,11 +71,17 @@ public class CharacterController2D : MonoBehaviour
         PlayerJumpIfPressed(jump);
     }
 
-    private void CheckIfFalling()
+    private void CheckIfFalling(bool wasFalling)
     {
         if(m_Rigidbody2D.velocity.y < 0)
         {
             m_Falling = true;
+            // if we are now falling and weren't previously, activate new fall state
+            if(m_Falling && !wasFalling)
+            {
+                Debug.Log("Falling");
+                OnFalling.Invoke();
+            }
         }
         else
         {
@@ -102,7 +112,7 @@ public class CharacterController2D : MonoBehaviour
                 if (!wasGrounded && m_Falling)
                 {
                     Debug.Log("Landed");
-                    OnLandEvent.Invoke();
+                    OnLand.Invoke();
                 }
             }
         }
@@ -117,7 +127,7 @@ public class CharacterController2D : MonoBehaviour
             if (!m_wasCrouching)
             {
                 m_wasCrouching = true;
-                OnCrouchEvent.Invoke(true);
+                OnCrouch.Invoke(true);
             }
 
             // Reduce the speed by the crouchSpeed multiplier
@@ -136,7 +146,7 @@ public class CharacterController2D : MonoBehaviour
             if (m_wasCrouching)
             {
                 m_wasCrouching = false;
-                OnCrouchEvent.Invoke(false);
+                OnCrouch.Invoke(false);
             }
         }
 

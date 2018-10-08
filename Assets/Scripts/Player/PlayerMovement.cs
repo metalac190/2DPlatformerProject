@@ -23,14 +23,14 @@ public class PlayerMovement : MonoBehaviour {
 
     private void OnEnable()
     {
-        controller.OnLandEvent.AddListener(HandleLand);
-        controller.OnCrouchEvent.AddListener(HandleCrouch);
+        controller.OnLand.AddListener(HandleLand);
+        controller.OnCrouch.AddListener(HandleCrouch);
     }
 
     private void OnDisable()
     {
-        controller.OnLandEvent.RemoveListener(HandleLand);
-        controller.OnCrouchEvent.RemoveListener(HandleCrouch);
+        controller.OnLand.RemoveListener(HandleLand);
+        controller.OnCrouch.RemoveListener(HandleCrouch);
     }
 
     void Update () {
