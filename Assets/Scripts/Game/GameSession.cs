@@ -6,26 +6,7 @@ using System;
 
 public class GameSession : MonoBehaviour {
 
-    #region Singleton Pattern - Lazy Load
-    private static GameSession instance = null;
-    public static GameSession Instance
-    {
-        get
-        {
-            if(instance == null)
-            {
-                instance = FindObjectOfType<GameSession>();
-                if(instance == null)
-                {
-                    GameObject go = new GameObject(typeof(GameSession).ToString());
-                    instance = go.AddComponent<GameSession>();
-                }
-            }
-
-            return instance;
-        }
-    }
-    #endregion
+    public static GameSession Instance = null;
 
     public int PlayerDeaths { get; private set; }
     public int CollectiblesSmall { get; private set; }
@@ -37,15 +18,16 @@ public class GameSession : MonoBehaviour {
     private void Awake()
     {
         #region Singleton Pattern - Create/Destroy
-        if(Instance != this)
+        if(Instance == null)
         {
-            Destroy(this);
-        }
-        else
-        {
+            Instance = this;
             DontDestroyOnLoad(gameObject);
             InitializeGameSession();
             SceneManager.sceneLoaded += HandleNewSceneLoaded;
+        }
+        else if(Instance != this)
+        {
+            Destroy(gameObject);
         }
         #endregion
     }

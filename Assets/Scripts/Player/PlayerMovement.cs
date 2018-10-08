@@ -19,8 +19,6 @@ public class PlayerMovement : MonoBehaviour {
     {
         controller = GetComponent<CharacterController2D>();
         animator = GetComponent<Animator>();
-
-
     }
 
     private void OnEnable()
