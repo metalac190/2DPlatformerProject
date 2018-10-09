@@ -145,7 +145,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 112634684}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.7317505, y: 0.60000026, z: -10}
+  m_LocalPosition: {x: -41.53, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1941192334}
@@ -213,9 +213,9 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 7
+  field of view: 40
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -257,7 +257,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 156687376}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.7317505, y: 0.60000026, z: -10}
+  m_LocalPosition: {x: -2.731369, y: 0.60000026, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1531232676}
@@ -4707,13 +4707,15 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 4553303299643776, guid: bc9d2b0153f12c84c8ad615d64f19144, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0.659
-      objectReference: {fileID: 0}
-    - target: {fileID: 4813966810899006, guid: bc9d2b0153f12c84c8ad615d64f19144, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: -0.999
+    - target: {fileID: 114490693551555444, guid: bc9d2b0153f12c84c8ad615d64f19144,
+        type: 2}
+      propertyPath: m_ShootPoint
+      value: 
+      objectReference: {fileID: 1850891201}
+    - target: {fileID: 114490693551555444, guid: bc9d2b0153f12c84c8ad615d64f19144,
+        type: 2}
+      propertyPath: shootPointCrouchOffset
+      value: -0.4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bc9d2b0153f12c84c8ad615d64f19144, type: 2}
@@ -10533,6 +10535,11 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 224276150282819548, guid: 84434ad280b5c8948b790793e3b92ec9,
     type: 2}
   m_PrefabInternal: {fileID: 664137182}
+--- !u!4 &1850891201 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4902902056149480, guid: bc9d2b0153f12c84c8ad615d64f19144,
+    type: 2}
+  m_PrefabInternal: {fileID: 863589128}
 --- !u!4 &1883807644 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4876959034675916, guid: bc9d2b0153f12c84c8ad615d64f19144,

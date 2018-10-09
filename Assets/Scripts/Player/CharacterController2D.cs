@@ -10,15 +10,20 @@ public class CharacterController2D : MonoBehaviour
 	[SerializeField] private LayerMask m_WhatIsGround;							// A mask determining what is ground to the character
 	[SerializeField] private Transform m_GroundCheck;							// A position marking where to check if the player is grounded.
 	[SerializeField] private Transform m_CeilingCheck;							// A position marking where to check for ceilings
+    [SerializeField] private Transform m_ShootPoint;                            // position to move downwards during crouch
+    [SerializeField] private float shootPointCrouchOffset;                      // amount to shift shoot point downwards during crouch
 	[SerializeField] private Collider2D m_CrouchDisableCollider;				// A collider that will be disabled when crouching
 
 	const float k_GroundedRadius = .3f; // Radius of the overlap circle to determine if grounded
-	private bool m_Grounded;            // Whether or not the player is grounded.
+    private bool m_Grounded = false;            // Whether or not the player is grounded.
+    private bool m_WasGrounded = false;
     private bool m_Falling = false;       // whether the player is currently moving upward in jump
+    private bool m_WasFalling = false;
 	const float k_CeilingRadius = .3f; // Radius of the overlap circle to determine if the player can stand up
 	private Rigidbody2D m_Rigidbody2D;
 	private bool m_FacingRight = true;  // For determining which way the player is currently facing.
 	private Vector3 m_Velocity = Vector3.zero;
+    private Vector2 m_shootPointOriginalPosition;
 
     [Header("Events")]
     [Space]
@@ -38,19 +43,18 @@ public class CharacterController2D : MonoBehaviour
 		m_Rigidbody2D = GetComponent<Rigidbody2D>();
 	}
 
-	private void FixedUpdate()
+    private void Start()
     {
-        // Store previous ground state and reset, so that we can test if landed
-        bool wasGrounded = m_Grounded;
-        m_Grounded = false;
-        // Store previous fall state and reset, so that we can test if falling
-        bool wasFalling = m_Falling;
-        m_Falling = false;
+        if (m_ShootPoint != null)
+            m_shootPointOriginalPosition = m_ShootPoint.localPosition;
+    }
 
-        CheckIfFalling(wasFalling);
+    private void FixedUpdate()
+    {
+        CheckIfFalling();
         // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
         // This can be done using layers instead but Sample Assets will not overwrite your project settings.
-        DetectGrounded(wasGrounded);
+        DetectGrounded();
     }
 
     public void Move(float move, bool crouch, bool jump)
@@ -71,13 +75,16 @@ public class CharacterController2D : MonoBehaviour
         PlayerJumpIfPressed(jump);
     }
 
-    private void CheckIfFalling(bool wasFalling)
+    private void CheckIfFalling()
     {
-        if(m_Rigidbody2D.velocity.y < 0)
+        // store previous state before we change it
+        m_WasFalling = m_Falling;
+        // if we have downward velocity and we're not grounded, then we're falling
+        if (m_Rigidbody2D.velocity.y < 0 && !m_Grounded)
         {
             m_Falling = true;
             // if we are now falling and weren't previously, activate new fall state
-            if(m_Falling && !wasFalling)
+            if(m_Falling && !m_WasFalling)
             {
                 Debug.Log("Falling");
                 OnFalling.Invoke();
@@ -97,10 +104,17 @@ public class CharacterController2D : MonoBehaviour
         m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
     }
 
-    private void DetectGrounded(bool wasGrounded)
+    private void DetectGrounded()
     {
+        m_WasGrounded = m_Grounded;
         // use spheres to detect ground objects
         Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
+
+        if(colliders.Length == 0)
+        {
+            m_Grounded = false;
+        }
+
         for (int i = 0; i < colliders.Length; i++)
         {
             // if we found a gameObject with the "Ground" layer attached
@@ -109,7 +123,7 @@ public class CharacterController2D : MonoBehaviour
                 // we are touching ground
                 m_Grounded = true;
                 // make sure we specify that we must be falling in order to successfully land
-                if (!wasGrounded && m_Falling)
+                if (!m_WasGrounded && m_Falling)
                 {
                     Debug.Log("Landed");
                     OnLand.Invoke();
@@ -123,9 +137,11 @@ public class CharacterController2D : MonoBehaviour
         // If crouching
         if (crouch)
         {
-            // if we were already crouching
+            // if we were not already crouching, it's a new crouch
             if (!m_wasCrouching)
             {
+                Debug.Log("Crouch");
+                ActivateCrouchComponents(true);
                 m_wasCrouching = true;
                 OnCrouch.Invoke(true);
             }
@@ -134,23 +150,51 @@ public class CharacterController2D : MonoBehaviour
             move *= m_CrouchSpeed;
 
             // Disable one of the colliders when crouching
-            if (m_CrouchDisableCollider != null)
-                m_CrouchDisableCollider.enabled = false;
+
+
         }
         else
         {
-            // Enable the collider when not crouching
-            if (m_CrouchDisableCollider != null)
-                m_CrouchDisableCollider.enabled = true;
-
+            // no longer crouching, newly standing
             if (m_wasCrouching)
             {
+                Debug.Log("Stand");
+                ActivateCrouchComponents(false);
                 m_wasCrouching = false;
                 OnCrouch.Invoke(false);
             }
         }
 
         return move;
+    }
+
+    private void ActivateCrouchComponents(bool crouch)
+    {
+        if (crouch)
+        {
+            // turn off standing collider
+            if (m_CrouchDisableCollider != null)
+                m_CrouchDisableCollider.enabled = false;
+            if (m_ShootPoint != null)
+            {
+                // shift shoot point during crouch
+                Vector2 newShootPointPosition = new Vector2(m_ShootPoint.position.x, 
+                    m_ShootPoint.position.y + shootPointCrouchOffset);
+                m_ShootPoint.position = newShootPointPosition;
+            }
+
+        }
+        else if(!crouch)
+        {
+            // Enable the collider when not crouching
+            if (m_CrouchDisableCollider != null)
+                m_CrouchDisableCollider.enabled = true;
+            // return shoot point to original position
+            if (m_ShootPoint != null)
+            {
+                m_ShootPoint.localPosition = m_shootPointOriginalPosition;
+            }
+        }
     }
 
     private bool CheckStandFromCrouch(bool crouch)

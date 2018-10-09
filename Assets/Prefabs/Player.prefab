@@ -116,7 +116,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1825933093065390}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.69, z: 0}
+  m_LocalPosition: {x: 0, y: 0.659, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4446893690640886}
@@ -129,7 +129,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1095136706494620}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalPosition: {x: 0, y: -0.999, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4446893690640886}
@@ -255,8 +255,6 @@ MonoBehaviour:
   ability1: {fileID: 11400000, guid: df0c85839a1f2e148a22e3fe4e95452a, type: 2}
   ability2: {fileID: 11400000, guid: df0c85839a1f2e148a22e3fe4e95452a, type: 2}
   firePoint: {fileID: 4902902056149480}
-  bulletPrefab: {fileID: 1795251597685820, guid: e653636200dba4643a4bbcdf024b56f3,
-    type: 2}
 --- !u!114 &114490693551555444
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -277,13 +275,25 @@ MonoBehaviour:
     m_Bits: 256
   m_GroundCheck: {fileID: 4813966810899006}
   m_CeilingCheck: {fileID: 4553303299643776}
+  m_ShootPoint: {fileID: 4902902056149480}
+  shootPointCrouchOffset: -0.2
   m_CrouchDisableCollider: {fileID: 61047307744923452}
-  OnLandEvent:
+  OnJump:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  OnCrouchEvent:
+  OnLand:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnFalling:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnCrouch:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: CharacterController2D+BoolEvent, Assembly-CSharp, Version=0.0.0.0,
