@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
-using System;
+using System.Collections;
 
 public class CharacterController2D : MonoBehaviour
 {
@@ -14,16 +14,21 @@ public class CharacterController2D : MonoBehaviour
 	[SerializeField] private Transform m_CeilingCheck;							// A position marking where to check for ceilings
     [SerializeField] private Transform m_ShootPoint;                            // position to move downwards during crouch
     [SerializeField] private float shootPointCrouchOffset;                      // amount to shift shoot point downwards during crouch
-	[SerializeField] private Collider2D m_CrouchDisableCollider;				// A collider that will be disabled when crouching
+	[SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
+    [SerializeField] private float m_AdditionalJumpWindowDuration;              // how much time do we allow 'extra' jumping
 
-	const float k_GroundedRadius = .3f; // Radius of the overlap circle to determine if grounded
+    private bool m_AdditionalJumpWindow = false;
+    private Coroutine m_AdditionalJumpTimer;  // Cached timer for extra jump window
+    const float k_GroundedRadius = .3f; // Radius of the overlap circle to determine if grounded
+    const float k_CeilingRadius = .3f; // Radius of the overlap circle to determine if the player can stand up
+    private bool m_WasJumping = false;     // if we get multiple jump commands consecutively, apply additional force instead of base (for more control)
     private bool m_Grounded = false;            // Whether or not the player is grounded.
     private bool m_WasGrounded = false;
     private bool m_Falling = false;       // whether the player is currently moving upward in jump
     private bool m_WasFalling = false;
-	const float k_CeilingRadius = .3f; // Radius of the overlap circle to determine if the player can stand up
-	private Rigidbody2D m_Rigidbody2D;
-	private bool m_FacingRight = true;  // For determining which way the player is currently facing.
+    private bool m_FacingRight = true;  // For determining which way the player is currently facing.
+
+    private Rigidbody2D m_Rigidbody2D;
 	private Vector3 m_Velocity = Vector3.zero;
     private Vector2 m_shootPointOriginalPosition;
 
@@ -59,7 +64,7 @@ public class CharacterController2D : MonoBehaviour
         DetectGrounded();
     }
 
-    public void Move(float move, bool crouch, bool jump)
+    public void Move(float move, bool crouch, bool jump, bool jumpExtra)
     {
         // determine if we are able to stand up from crouch
         crouch = CheckStandFromCrouch(crouch);
@@ -73,8 +78,25 @@ public class CharacterController2D : MonoBehaviour
             // check player direction reverse
             FlipPlayer(move);
         }
+
         // If the player should jump...
-        PlayerJumpIfPressed(jump);
+        DetectInitialJump(jump);
+        // Apply additional jump before initial jump to avoid double application on first cycle
+        ApplyAdditionalJumpForce(jumpExtra);
+        // start our extra jump counter (for variable height)
+        m_AdditionalJumpTimer = StartCoroutine(AdditionalJumpTimer(m_AdditionalJumpWindowDuration));
+    }
+
+    private void ApplyAdditionalJumpForce(bool extraJump)
+    {
+        // if we're supposed to jump, and have been jumping consecutively, apply the additional force instead of the base
+        //if (extraJump && m_WasJumping)
+        if(extraJump)
+        {
+            m_Rigidbody2D.AddForce(new Vector2(0f, m_AdditionalJumpForce));
+        }
+        // store our previous jumping value
+        //m_WasJumping = extraJump;
     }
 
     private void CheckIfFalling()
@@ -150,10 +172,6 @@ public class CharacterController2D : MonoBehaviour
 
             // Reduce the speed by the crouchSpeed multiplier
             move *= m_CrouchSpeed;
-
-            // Disable one of the colliders when crouching
-
-
         }
         else
         {
@@ -229,13 +247,14 @@ public class CharacterController2D : MonoBehaviour
         }
     }
 
-    private void PlayerJumpIfPressed(bool jump)
+    private void DetectInitialJump(bool jump)
     {
         if (m_Grounded && jump)
         {
             // Add a vertical force to the player.
             m_Grounded = false;
             m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+
             OnJump.Invoke();
         }
     }
@@ -247,5 +266,11 @@ public class CharacterController2D : MonoBehaviour
         transform.Rotate(0f, 180f, 0f);
 	}
 
-    
+    IEnumerator AdditionalJumpTimer(float additionalJumpWindowDuration)
+    {
+        m_AdditionalJumpWindow = true;
+        yield return new WaitForSeconds(additionalJumpWindowDuration);
+        m_AdditionalJumpWindow = false;
+    }
+
 }

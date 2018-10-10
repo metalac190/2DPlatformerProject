@@ -4720,7 +4720,17 @@ Prefab:
     - target: {fileID: 114490693551555444, guid: bc9d2b0153f12c84c8ad615d64f19144,
         type: 2}
       propertyPath: m_JumpForce
-      value: 400
+      value: 800
+      objectReference: {fileID: 0}
+    - target: {fileID: 114490693551555444, guid: bc9d2b0153f12c84c8ad615d64f19144,
+        type: 2}
+      propertyPath: m_AdditionalJumpWindowDuration
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114490693551555444, guid: bc9d2b0153f12c84c8ad615d64f19144,
+        type: 2}
+      propertyPath: m_AdditionalJumpForce
+      value: 20
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bc9d2b0153f12c84c8ad615d64f19144, type: 2}

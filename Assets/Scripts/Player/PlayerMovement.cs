@@ -10,10 +10,14 @@ public class PlayerMovement : MonoBehaviour {
     Animator animator;
 
     public float runSpeed = 40f;
+    //public float jumpHeight = 200f;
+    //public float jumpExtraHeight = 30f;
 
     float horizontalMove = 0f;
-    bool isJumping = false;
-    bool isCrouching = false;
+    bool isAirborn = false;     // whether or not we are commanding player to jump this update
+    bool isJumpingExtra = false;    // whether or not we applying extra jump force on this update
+    bool isCrouching = false;   // whether or not we are commanding player to crouch this update
+
 
     private void Awake()
     {
@@ -25,25 +29,68 @@ public class PlayerMovement : MonoBehaviour {
     {
         controller.OnLand.AddListener(HandleLand);
         controller.OnCrouch.AddListener(HandleCrouch);
+        controller.OnFalling.AddListener(HandleFall);
     }
 
     private void OnDisable()
     {
         controller.OnLand.RemoveListener(HandleLand);
         controller.OnCrouch.RemoveListener(HandleCrouch);
+        controller.OnFalling.AddListener(HandleFall);
     }
 
-    void Update () {
+    void Update ()
+    {
+        CheckMovementInput();
+        CheckInitialJumpInput();
+        CheckExtraJumpInput();
+        CheckCrouchInput();
+    }
 
+    private void FixedUpdate()
+    {
+        CommandCharacterMovement();
+        ResetMoveStates();
+    }
+
+    private void ResetMoveStates()
+    {
+        isAirborn = false;
+        isJumpingExtra = false;
+    }
+
+    private void CommandCharacterMovement()
+    {
+        controller.Move(horizontalMove * Time.fixedDeltaTime, isCrouching, isAirborn, isJumpingExtra);
+    }
+
+    private void CheckMovementInput()
+    {
         horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
 
         animator.SetFloat("Speed", Mathf.Abs(horizontalMove));
+    }
 
-        if (Input.GetButtonDown("Jump"))
+    private void CheckInitialJumpInput()
+    {
+        if (Input.GetButtonDown("Jump") && !isAirborn)
         {
-            isJumping = true;
-            animator.SetBool("IsJumping", true);
+            animator.SetTrigger("Jump");
+            isAirborn = true;
+            animator.SetBool("IsAirborn", true);
         }
+    }
+
+    private void CheckExtraJumpInput()
+    {
+        if (Input.GetButton("Jump") && isAirborn)
+        {
+            isJumpingExtra = true;
+        }
+    }
+
+    private void CheckCrouchInput()
+    {
         if (Input.GetButtonDown("Crouch"))
         {
             isCrouching = true;
@@ -56,18 +103,16 @@ public class PlayerMovement : MonoBehaviour {
 
     void HandleLand()
     {
-        animator.SetBool("IsJumping", false);
+        animator.SetBool("IsAirborn", false);
     }
 
-    public void HandleCrouch(bool isCrouching)
+    void HandleCrouch(bool isCrouching)
     {
         animator.SetBool("IsCrouching", isCrouching);
     }
 
-    private void FixedUpdate()
+    void HandleFall()
     {
-        controller.Move(horizontalMove * Time.fixedDeltaTime, isCrouching, isJumping);
-        // reset jump at end of update
-        isJumping = false;
+        animator.SetTrigger("Fall");
     }
 }
