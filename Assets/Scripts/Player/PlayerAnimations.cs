@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
 public class PlayerAnimations : MonoBehaviour {
-    /*
-    [SerializeField] Player player;
-    [SerializeField] Rigidbody2D playerRigidbody;
 
+    CharacterController2D characterController;
+    Rigidbody2D rigidbody2D;
     Animator animator;
+
+    bool isAirborn = false;
+    bool isJumpingExtra = false;
+    bool isCrouching = false;
 
     // Use this for initialization
     void Awake ()
@@ -18,61 +23,45 @@ public class PlayerAnimations : MonoBehaviour {
 
     private void FillReferences()
     {
+        characterController = GetComponent<CharacterController2D>();
         animator = GetComponent<Animator>();
-
-        if (player == null)
-        {
-            player = FindObjectOfType<Player>();
-        }
-        if (playerRigidbody == null)
-        {
-            player.GetComponent<Rigidbody>();
-        }
+        rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
     private void OnEnable()
     {
-        player.OnLand += HandleLand;
-        player.OnJump += HandleJump;
-        player.OnDeath += HandleDeath;
+        characterController.OnLand.AddListener(OnLandCallback);
+        characterController.OnJump.AddListener(OnJumpCallback);
+        characterController.OnCrouch.AddListener(OnCrouchCallback);
+        characterController.OnFall.AddListener(OnFallCallback);
+        //characterController.OnDeath.AddListener(OnDeathCallback);
     }
 
     private void OnDisable()
     {
-        player.OnLand -= HandleLand;
-        player.OnJump -= HandleJump;
-        player.OnDeath -= HandleDeath;
+        characterController.OnLand.RemoveListener(OnLandCallback);
+        characterController.OnJump.RemoveListener(OnJumpCallback);
+        characterController.OnCrouch.RemoveListener(OnCrouchCallback);
+        characterController.OnFall.RemoveListener(OnFallCallback);
     }
 
-    // Update is called once per frame
-    void Update () {
-
-    }
-
-    void HandleDeath()
-    {
-        animator.SetTrigger("Dying");
-    }
-
-    void HandleRun(bool isRunning)
-    {
-        animator.SetBool("isRunning", isRunning);
-    }
-
-    void HandleJump()
+    void OnJumpCallback()
     {
         animator.SetTrigger("OnJump");
     }
 
-    void HandleLand()
+    void OnLandCallback()
     {
         animator.SetTrigger("OnLand");
     }
 
-    private void FlipSprite()
+    void OnCrouchCallback(bool isCrouching)
     {
-        // reverse current scaling of x axis
-        transform.localScale = new Vector2(Mathf.Sign(playerRigidbody.velocity.x), 1f);
+        animator.SetBool("IsCrouching", isCrouching);
     }
-    */
+
+    void OnFallCallback()
+    {
+        animator.SetTrigger("Fall");
+    }
 }

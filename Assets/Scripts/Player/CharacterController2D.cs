@@ -37,7 +37,7 @@ public class CharacterController2D : MonoBehaviour
 
     public UnityEvent OnJump = new UnityEvent();
 	public UnityEvent OnLand = new UnityEvent();
-    public UnityEvent OnFalling = new UnityEvent();
+    public UnityEvent OnFall = new UnityEvent();
 
 	[System.Serializable]
 	public class BoolEvent : UnityEvent<bool> { }
@@ -111,7 +111,7 @@ public class CharacterController2D : MonoBehaviour
             if(m_Falling && !m_WasFalling)
             {
                 Debug.Log("Falling");
-                OnFalling.Invoke();
+                OnFall.Invoke();
             }
         }
         else
